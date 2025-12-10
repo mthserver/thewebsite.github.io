@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информационное ТВ Школы</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        header { background-color: #007bff; color: white; padding: 3px; }
+        section { padding: 5px; }
+        #current-lesson-box {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 500px;
+        }
+        #id_clock {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+        table { border-collapse: collapse; width: 100%; }
+        table, td, th { border: 0px solid black; padding: 3px; vertical-align: top; }
+        video { display: block; width: 70%; height: auto; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h4><div id="id_clock"></div></h4>
+	<script>
+function digitalClock() {
+    let date = new Date();
+    let h = String(date.getHours()).padStart(2, '0');
+    let m = String(date.getMinutes()).padStart(2, '0');
+    let s = String(date.getSeconds()).padStart(2, '0');
+
+    document.getElementById("id_clock").innerHTML = h + ":" + m + ":" + s;
+    setTimeout(digitalClock, 1000);
+}
+digitalClock();
+</script>
+</header>
+
+
+
+<section>
+    <table>
+        
+		<tr>
+			</td>
+            <!-- Ячейка с расписанием -->
+            <td>
+                
+                <div id="current-lesson-box">
+                    <h3 id="lesson-name">Определение...</h3>
+                    <p id="lesson-time"></p>
+
+                    <h3>Занятия по классам:</h3>
+                    <div id="lesson-table-output"></div>
+                </div>
+            </td>
+
+            <!-- Ячейка с видео -->
+            <td>
+                <video id="main-video" width="640" height="500" autoplay muted></video>
+            </td>
+			<td>
+				<img src="https://school385.ru/local/templates/385school/images/logo.svg" style="width: 300px; height: 300;">
+			</td>
+        </tr>
+    </table>
+
+<script>
+/* ---------------------------
+   ВРЕМЕНА УРОКОВ
+--------------------------- */
+const lessons = [
+    { num: 1, start: "09:00", end: "09:40" },
+    { num: 2, start: "10:00", end: "10:40" },
+    { num: 3, start: "11:00", end: "11:40" },
+    { num: 4, start: "12:00", end: "12:40" },
+    { num: 5, start: "13:00", end: "13:40" },
+    { num: 6, start: "13:55", end: "14:35" },
+    { num: 7, start: "14:45", end: "15:25" },
+    { num: 8, start: "15:35", end: "22:15" }
+];
+
+/* ---------------------------
+   РАСПИСАНИЕ ПРЕДМЕТОВ
+--------------------------- */
+const classSchedule = {
+    "5а": ["РоВ", "английский язык", "математика", "биология", "русский язык", "литература", "", ""],
+    "5б": ["РоВ", "математика", "русский язык", "английский язык", "биология", "литература", "", ""],
+    "6а": ["РоВ", "русский язык", "математика", "английский язык", "история", "литература", "русский язык", ""],
+    "6б": ["РоВ", "", "", "", "", "", "", ""],
+    "7а": ["РоВ", "", "", "", "", "", "", ""],
+    "7б": ["РоВ", "", "", "", "", "", "", ""],
+    "8а": ["РоВ", "", "", "", "", "", "", ""],
+    "8б": ["РоВ", "", "", "", "", "", "", ""],
+    "9а": ["РоВ", "", "", "", "", "", "", ""],
+    "9б": ["РоВ", "", "", "", "", "", "", ""],
+    "10а1": ["РоВ", "", "", "", "", "", "", ""],
+    "10а2": ["РоВ", "", "", "", "", "", "", ""],
+    "11а": ["РоВ", "", "", "", "", "", "", ""]
+};
+
+function toMinutes(t) {
+    let [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+}
+
+function getCurrentLessonNumber() {
+    let now = new Date();
+    let minutes = now.getHours() * 60 + now.getMinutes();
+
+    for (let les of lessons) {
+        if (minutes >= toMinutes(les.start) && minutes < toMinutes(les.end)) {
+            return les.num;
+        }
+    }
+    return null;
+}
+
+function updateLessonInfo() {
+    let num = getCurrentLessonNumber();
+
+    if (!num) {
+        document.getElementById("lesson-name").innerText = "Нет уроков";
+        document.getElementById("lesson-time").innerText = "";
+        document.getElementById("lesson-table-output").innerHTML = "";
+        return;
+    }
+
+    const les = lessons[num - 1];
+    document.getElementById("lesson-name").innerText = `Урок ${num}`;
+    document.getElementById("lesson-time").innerText = `${les.start} — ${les.end}`;
+
+    let html = "<table><tr><th>Класс</th><th>Предмет</th></tr>";
+
+    for (let cls in classSchedule) {
+        let subject = classSchedule[cls][num - 1] || "";
+        html += `<tr><td><h4>${cls}</h4></td><td><h4>${subject}</h4></td></tr>`;
+    }
+
+    html += "</table>";
+    document.getElementById("lesson-table-output").innerHTML = html;
+}
+
+setInterval(updateLessonInfo, 10000);
+updateLessonInfo();
+</script>
+
+<script>
+const videoSources = [
+    { src: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4', type: 'video/mp4' },
+    { src: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4', type: 'video/mp4' },
+    { src: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4', type: 'video/mp4' }
+];
+
+let videoIndex = 0;
+
+function loadVideo() {
+    const video = document.getElementById('main-video');
+    video.innerHTML = `<source src="${videoSources[videoIndex].src}" type="${videoSources[videoIndex].type}">`;
+    video.load();
+    video.play();
+    videoIndex++;
+}
+
+document.getElementById('main-video').addEventListener('ended', () => {
+    if (videoIndex < videoSources.length) loadVideo();
+    else location.reload();
+});
+
+window.onload = loadVideo;
+</script>
+
+</section>
+</body>
+</html>
