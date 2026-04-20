@@ -1,69 +1,102 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Информационное ТВ Школы</title>
+<meta charset="UTF-8">
+<title>Расписание</title>
 
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
-        header { background-color: #007bff; color: white; padding: 3px; }
-        section { padding: 5px; }
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+}
 
-        #current-lesson-box {
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            width: 500px;
-        }
+/* ОСНОВНАЯ СЕТКА */
+.container {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    height: 100vh;
+}
 
-        #id_clock {
-            font-size: 30px;
-            font-weight: bold;
-            text-align: center;
-        }
+/* ЛЕВАЯ ЧАСТЬ */
+.left {
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-        table { border-collapse: collapse; width: 100%; }
-        td, th { padding: 3px; text-align: left; }
+#id_clock {
+    font-size: 60px;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        video { display: block; width: 90%; height: auto; }
-    </style>
+#lesson-name {
+    font-size: 40px;
+    text-align: center;
+}
+
+#day-name {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+/* ТАБЛИЦА */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 18px;
+}
+
+td, th {
+    border-bottom: 1px solid #333;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+/* ПРАВАЯ ЧАСТЬ (ВИДЕО) */
+.right {
+    width: 100%;
+    height: 100%;
+}
+
+#main-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* СКРОЛЛ ЕСЛИ МНОГО */
+#lesson-table-output {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+</style>
 </head>
 
 <body>
 
-<header>
-    <h4><div id="id_clock"></div></h4>
-</header>
+<div class="container">
 
-<section>
-<table>
-<tr>
+    <!-- ЛЕВАЯ ПАНЕЛЬ -->
+    <div class="left">
+        <div id="id_clock"></div>
+        <div id="day-name"></div>
+        <div id="lesson-name"></div>
+        <div id="lesson-time"></div>
+        <div id="lesson-table-output"></div>
+    </div>
 
-<td>
-<div id="current-lesson-box">
-    <h3 id="day-name"></h3>
-    <h3 id="lesson-name">Определение...</h3>
-    <p id="lesson-time"></p>
+    <!-- ВИДЕО -->
+    <div class="right">
+        <video id="main-video" autoplay muted></video>
+    </div>
 
-   
-
-    <h3>Занятия по классам:</h3>
-    <div id="lesson-table-output"></div>
-    
 </div>
-</td>
-
-<td>
-    <video id="main-video" width="2060" height="940" autoplay muted></video>
-</td>
-
-
-</tr>
-</table>
 
 <script>
+
 /* ЧАСЫ */
 function digitalClock() {
     let date = new Date();
@@ -76,7 +109,7 @@ function digitalClock() {
 }
 digitalClock();
 
-/* ВРЕМЯ УРОКОВ */
+/* УРОКИ */
 const lessons = [
     { num: 1, start: "08:00", end: "09:40" },
     { num: 2, start: "09:40", end: "10:40" },
@@ -88,7 +121,33 @@ const lessons = [
     { num: 8, start: "15:25", end: "22:15" }
 ];
 
-/* РАСПИСАНИЕ ПО ДНЯМ */
+/* ДНИ */
+const dayNames = ["", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница"];
+
+function getCurrentDay() {
+    let d = new Date().getDay();
+    return d === 0 ? null : d;
+}
+
+/* ВРЕМЯ */
+function toMinutes(t) {
+    let [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+}
+
+function getCurrentLessonNumber() {
+    let now = new Date();
+    let minutes = now.getHours() * 60 + now.getMinutes();
+
+    for (let les of lessons) {
+        if (minutes >= toMinutes(les.start) && minutes < toMinutes(les.end)) {
+            return les.num;
+        }
+    }
+    return null;
+}
+
+/* РАСПИСАНИЕ (сократил пример — вставь своё полностью) */
 const weeklySchedule = {
   1: { // Понедельник
 "5а": ["", "", "английский язык", "история", "практикум по географии", "литература", "ОБЗР", ""],
@@ -177,48 +236,19 @@ const weeklySchedule = {
 
 };
 
-/* ДЕНЬ НЕДЕЛИ */
-const dayNames = ["", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница"];
-
-function getCurrentDay() {
-    let d = new Date().getDay();
-    return d === 0 ? null : d;
-}
-
-/* ВСПОМОГАТЕЛЬНОЕ */
-function toMinutes(t) {
-    let [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-}
-
-function getCurrentLessonNumber() {
-    let now = new Date();
-    let minutes = now.getHours() * 60 + now.getMinutes();
-
-    for (let les of lessons) {
-        if (minutes >= toMinutes(les.start) && minutes < toMinutes(les.end)) {
-            return les.num;
-        }
-    }
-    return null;
-}
-
-/* ОСНОВНОЕ ОБНОВЛЕНИЕ */
+/* ОБНОВЛЕНИЕ */
 function updateLessonInfo() {
     let num = getCurrentLessonNumber();
     let day = getCurrentDay();
 
     if (!num || !day || !weeklySchedule[day]) {
         document.getElementById("lesson-name").innerText = "Нет уроков";
-        document.getElementById("lesson-time").innerText = "";
         document.getElementById("lesson-table-output").innerHTML = "";
         document.getElementById("day-name").innerText = "";
         return;
     }
 
-    const les = lessons[num - 1];
-    document.getElementById("lesson-name").innerText = `Урок ${num}`;
-    document.getElementById("lesson-time").innerText = ``;
+    document.getElementById("lesson-name").innerText = "Урок " + num;
     document.getElementById("day-name").innerText = dayNames[day];
 
     let html = "<table><tr><th>Класс</th><th>Предмет</th></tr>";
@@ -226,11 +256,15 @@ function updateLessonInfo() {
     const todaySchedule = weeklySchedule[day];
 
     for (let cls in todaySchedule) {
-        let subject = todaySchedule[cls][num - 1] || "";
+        let subject = todaySchedule[cls][num - 1];
+
+        if (!subject || subject.trim() === "") continue;
+
         html += `<tr><td><b>${cls}</b></td><td>${subject}</td></tr>`;
     }
 
     html += "</table>";
+
     document.getElementById("lesson-table-output").innerHTML = html;
 }
 
@@ -239,7 +273,6 @@ updateLessonInfo();
 
 /* ВИДЕО */
 const videoSources = [
-    { src: './video.mp4', type: 'video/mp4' },
     { src: './video.mp4', type: 'video/mp4' }
 ];
 
@@ -250,13 +283,11 @@ function loadVideo() {
     video.innerHTML = `<source src="${videoSources[videoIndex].src}" type="${videoSources[videoIndex].type}">`;
     video.load();
     video.play();
-    videoIndex++;
 }
 
-document.getElementById('main-video').addEventListener('ended', () => {
-    if (videoIndex < videoSources.length) loadVideo();
-    else location.reload();
-});
-
 window.onload = loadVideo;
+
 </script>
+
+</body>
+</html>
